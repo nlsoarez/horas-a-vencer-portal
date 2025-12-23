@@ -5,17 +5,17 @@
 
 /* CSS Variables - Design Tokens */
 :root {
-    /* Primary Colors */
-    --primary-50: #eef2ff;
-    --primary-100: #e0e7ff;
-    --primary-200: #c7d2fe;
-    --primary-300: #a5b4fc;
-    --primary-400: #818cf8;
-    --primary-500: #6366f1;
-    --primary-600: #4f46e5;
-    --primary-700: #4338ca;
-    --primary-800: #3730a3;
-    --primary-900: #312e81;
+    /* Primary Colors - Claro Brasil */
+    --primary-50: #fef2f2;
+    --primary-100: #fee2e2;
+    --primary-200: #fecaca;
+    --primary-300: #fca5a5;
+    --primary-400: #f87171;
+    --primary-500: #DA291C;
+    --primary-600: #C41E12;
+    --primary-700: #b91c1c;
+    --primary-800: #991b1b;
+    --primary-900: #7f1d1d;
 
     /* Neutral Colors */
     --gray-50: #f9fafb;
@@ -138,7 +138,7 @@ body {
     justify-content: center;
     color: white;
     font-size: 1.25rem;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 4px 12px rgba(218, 41, 28, 0.4);
 }
 
 .logo-text {
@@ -177,7 +177,7 @@ body {
 .nav-item.active {
     background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
     color: white;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 12px rgba(218, 41, 28, 0.3);
 }
 
 .nav-item i {
@@ -483,12 +483,12 @@ body {
 .btn-primary {
     background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
     color: white;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 12px rgba(218, 41, 28, 0.3);
 }
 
 .btn-primary:hover {
     background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
-    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 6px 16px rgba(218, 41, 28, 0.4);
     transform: translateY(-1px);
 }
 
