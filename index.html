@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Controle de Horas a Vencer</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-clock"></i> Portal de Controle de Horas a Vencer</h1>
+            <p class="subtitle">Faça upload da planilha CSV para processar e visualizar o status das horas</p>
+        </header>
+
+        <main>
+            <div class="upload-section">
+                <div class="upload-area" id="dropArea">
+                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                    <h3>Arraste e solte seu arquivo CSV aqui</h3>
+                    <p>ou</p>
+                    <label for="fileInput" class="btn btn-primary">
+                        <i class="fas fa-file-upload"></i> Selecione o Arquivo
+                    </label>
+                    <input type="file" id="fileInput" accept=".csv" hidden>
+                    <p class="file-info">Formato esperado: CSV com separador ponto-e-vírgula (;)</p>
+                </div>
+                
+                <div class="requirements">
+                    <h4><i class="fas fa-info-circle"></i> Estrutura do Arquivo:</h4>
+                    <ul>
+                        <li>Formato CSV com cabeçalho</li>
+                        <li>Separador: ponto-e-vírgula (;)</li>
+                        <li>Colunas esperadas: FUNC_ID, NOME, EMPRESA_COD, CARGO, STATUS, DESCRICAO, BHMV_DAT_MOVTO, DATA_VENC, SALDO, A_VENCER_EM_DIAS</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="results-section" id="resultsSection" style="display: none;">
+                <div class="results-header">
+                    <h2><i class="fas fa-chart-bar"></i> Resultados Processados</h2>
+                    <div class="stats">
+                        <span id="totalRegistros">0 registros</span>
+                        <span id="dataProcessamento">-</span>
+                    </div>
+                </div>
+
+                <div class="alert-summary">
+                    <div class="alert-card urgent">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Crítico (< 7 dias)</h4>
+                        <p id="countCritical">0</p>
+                    </div>
+                    <div class="alert-card warning">
+                        <h4><i class="fas fa-exclamation-circle"></i> Alerta (7-30 dias)</h4>
+                        <p id="countWarning">0</p>
+                    </div>
+                    <div class="alert-card normal">
+                        <h4><i class="fas fa-check-circle"></i> Normal (> 30 dias)</h4>
+                        <p id="countNormal">0</p>
+                    </div>
+                </div>
+
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="filterStatus"><i class="fas fa-user-tag"></i> Status:</label>
+                        <select id="filterStatus">
+                            <option value="all">Todos</option>
+                            <option value="ATIVO">Ativos</option>
+                            <option value="FÉRIAS">Férias</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterDays"><i class="fas fa-calendar-day"></i> Dias a Vencer:</label>
+                        <select id="filterDays">
+                            <option value="all">Todos</option>
+                            <option value="critical">Crítico (< 7 dias)</option>
+                            <option value="warning">Alerta (7-30 dias)</option>
+                            <option value="normal">Normal (> 30 dias)</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="searchName"><i class="fas fa-search"></i> Buscar Nome:</label>
+                        <input type="text" id="searchName" placeholder="Digite o nome...">
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>Funcionário</th>
+                                <th>ID</th>
+                                <th>Cargo</th>
+                                <th>Status</th>
+                                <th>Saldo (HH:MM)</th>
+                                <th>Data Vencimento</th>
+                                <th>Dias a Vencer</th>
+                                <th>Alerta</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- Dados serão inseridos aqui -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="export-section">
+                    <button id="exportBtn" class="btn btn-success">
+                        <i class="fas fa-file-export"></i> Exportar Resumo
+                    </button>
+                    <button id="clearBtn" class="btn btn-secondary">
+                        <i class="fas fa-redo"></i> Processar Novo Arquivo
+                    </button>
+                </div>
+            </div>
+
+            <div class="instructions">
+                <h3><i class="fas fa-question-circle"></i> Como Usar:</h3>
+                <ol>
+                    <li>Exporte a planilha do sistema no formato CSV (separador ;)</li>
+                    <li>Faça o upload usando o botão acima</li>
+                    <li>Visualize os resultados com alertas de vencimento</li>
+                    <li>Filtre por status, dias a vencer ou nome</li>
+                    <li>Exporte o resumo se necessário</li>
+                </ol>
+            </div>
+        </main>
+
+        <footer>
+            <p><i class="fas fa-code"></i> Desenvolvido para controle de horas a vencer | 
+               <i class="fas fa-github"></i> <a href="https://github.com/seu-usuario/horas-a-vencer-portal" target="_blank">GitHub Repository</a></p>
+        </footer>
+    </div>
+
+    <!-- Modal para detalhes -->
+    <div id="detailsModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3 id="modalTitle">Detalhes do Funcionário</h3>
+            <div id="modalContent">
+                <!-- Conteúdo dinâmico -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
