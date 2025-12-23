@@ -138,7 +138,7 @@
                         </div>
                         <div class="stat-content">
                             <span class="stat-value" id="countCritical">0</span>
-                            <span class="stat-label">Crítico (&lt; 7 dias)</span>
+                            <span class="stat-label">Crítico (&lt; 30 dias)</span>
                         </div>
                         <div class="stat-trend trend-up">
                             <i class="fas fa-arrow-up"></i>
@@ -150,7 +150,7 @@
                         </div>
                         <div class="stat-content">
                             <span class="stat-value" id="countWarning">0</span>
-                            <span class="stat-label">Alerta (7-30 dias)</span>
+                            <span class="stat-label">Atenção (30-60 dias)</span>
                         </div>
                     </div>
                     <div class="stat-card stat-normal">
@@ -159,7 +159,7 @@
                         </div>
                         <div class="stat-content">
                             <span class="stat-value" id="countNormal">0</span>
-                            <span class="stat-label">Normal (&gt; 30 dias)</span>
+                            <span class="stat-label">Normal (&gt; 60 dias)</span>
                         </div>
                     </div>
                 </div>
@@ -198,9 +198,9 @@
                         <div class="filter-group">
                             <select id="filterDays" class="filter-select">
                                 <option value="all">Todos os Prazos</option>
-                                <option value="critical">Crítico (&lt; 7 dias)</option>
-                                <option value="warning">Alerta (7-30 dias)</option>
-                                <option value="normal">Normal (&gt; 30 dias)</option>
+                                <option value="critical">Crítico (&lt; 30 dias)</option>
+                                <option value="warning">Atenção (30-60 dias)</option>
+                                <option value="normal">Normal (&gt; 60 dias)</option>
                             </select>
                         </div>
                         <div class="filter-group search-group">
