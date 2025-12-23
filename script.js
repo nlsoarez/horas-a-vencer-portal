@@ -5,6 +5,7 @@ let groupedData = [];
 // Elementos DOM
 const fileInput = document.getElementById('fileInput');
 const dropArea = document.getElementById('dropArea');
+const uploadSection = document.getElementById('uploadSection');
 const resultsSection = document.getElementById('resultsSection');
 const tableBody = document.getElementById('tableBody');
 const totalRegistros = document.getElementById('totalRegistros');
@@ -21,20 +22,51 @@ const modal = document.getElementById('detailsModal');
 const modalTitle = document.getElementById('modalTitle');
 const modalContent = document.getElementById('modalContent');
 const closeModal = document.querySelector('.close');
+const menuToggle = document.getElementById('menuToggle');
+const sidebar = document.querySelector('.sidebar');
+const helpBtn = document.getElementById('helpBtn');
+const helpModal = document.getElementById('helpModal');
+const showingCount = document.getElementById('showingCount');
 
 // Event Listeners
 fileInput.addEventListener('change', handleFileSelect);
 dropArea.addEventListener('dragover', handleDragOver);
 dropArea.addEventListener('dragleave', handleDragLeave);
 dropArea.addEventListener('drop', handleDrop);
+dropArea.addEventListener('click', () => fileInput.click());
 filterStatus.addEventListener('change', filterTable);
 filterDays.addEventListener('change', filterTable);
 searchName.addEventListener('input', filterTable);
 exportBtn.addEventListener('click', exportSummary);
 clearBtn.addEventListener('click', clearData);
 closeModal.addEventListener('click', () => modal.style.display = 'none');
-window.addEventListener('click', (e) => {
-    if (e.target === modal) modal.style.display = 'none';
+
+// Modal overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', () => {
+        overlay.parentElement.style.display = 'none';
+    });
+});
+
+// Menu toggle for mobile
+if (menuToggle) {
+    menuToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+    });
+}
+
+// Help modal
+if (helpBtn) {
+    helpBtn.addEventListener('click', () => {
+        helpModal.style.display = 'block';
+    });
+}
+
+// Close modal with Escape key
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+    }
 });
 
 // Função para lidar com seleção de arquivo
@@ -46,16 +78,19 @@ function handleFileSelect(event) {
 // Função para arrastar e soltar
 function handleDragOver(event) {
     event.preventDefault();
+    event.stopPropagation();
     dropArea.classList.add('dragover');
 }
 
 function handleDragLeave(event) {
     event.preventDefault();
+    event.stopPropagation();
     dropArea.classList.remove('dragover');
 }
 
 function handleDrop(event) {
     event.preventDefault();
+    event.stopPropagation();
     dropArea.classList.remove('dragover');
     const file = event.dataTransfer.files[0];
     if (file && file.name.endsWith('.csv')) {
@@ -91,10 +126,13 @@ function processFile(file) {
             displayResults();
             updateSummary();
 
+            // Esconder upload section e mostrar results
+            uploadSection.style.display = 'none';
+
             // Mostrar popup de sucesso
             const totalFunc = groupedData.length;
             const totalLanc = processedData.length;
-            showToast(`Planilha carregada com sucesso! ${totalFunc} funcionário(s) e ${totalLanc} lançamento(s) processados.`, 'success');
+            showToast(`Planilha carregada! ${totalFunc} funcionário(s) processados.`, 'success');
 
             // Scroll suave até os resultados
             resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -109,7 +147,7 @@ function processFile(file) {
 // Agrupar dados por funcionário
 function groupData() {
     const grouped = {};
-    
+
     processedData.forEach(row => {
         const id = row.FUNC_ID;
         if (!grouped[id]) {
@@ -126,11 +164,11 @@ function groupData() {
                 alerta: 'normal'
             };
         }
-        
+
         // Converter saldo para minutos
         const saldoMinutos = timeToMinutes(row.SALDO);
         grouped[id].totalSaldo += saldoMinutos;
-        
+
         // Adicionar lançamento
         grouped[id].lancamentos.push({
             descricao: row.DESCRICAO,
@@ -139,7 +177,7 @@ function groupData() {
             saldo: row.SALDO,
             diasVencer: parseInt(row.A_VENCER_EM_DIAS) || 0
         });
-        
+
         // Atualizar menor dias a vencer
         const dias = parseInt(row.A_VENCER_EM_DIAS) || 0;
         if (dias < grouped[id].minDiasVencer) {
@@ -147,39 +185,43 @@ function groupData() {
             grouped[id].dataVencimento = row.DATA_VENC;
         }
     });
-    
+
     // Converter total de saldo de volta para formato HH:MM e determinar alerta
     groupedData = Object.values(grouped).map(func => {
         const totalHHMM = minutesToTime(func.totalSaldo);
-        
+
         // Determinar nível de alerta
         let alerta = 'normal';
         if (func.minDiasVencer < 7) alerta = 'critical';
         else if (func.minDiasVencer <= 30) alerta = 'warning';
-        
+
         return {
             ...func,
             totalSaldoStr: totalHHMM,
             alerta: alerta
         };
     });
+
+    // Ordenar por dias a vencer (mais urgentes primeiro)
+    groupedData.sort((a, b) => a.minDiasVencer - b.minDiasVencer);
 }
 
 // Exibir resultados na tabela
 function displayResults() {
     tableBody.innerHTML = '';
-    
+
     groupedData.forEach(func => {
         const row = document.createElement('tr');
-        
+
         // Determinar classes CSS baseadas no status e alerta
         const statusClass = func.status === 'ATIVO' ? 'status-ativo' : 'status-ferias';
         const alertClass = `alert-${func.alerta}`;
-        
+        const priorityClass = `priority-${func.alerta}`;
+
         row.innerHTML = `
-            <td><strong>${func.nome}</strong></td>
-            <td>${func.id}</td>
-            <td>${func.cargo}</td>
+            <td>${func.nome}</td>
+            <td><span style="color: var(--gray-500); font-family: monospace;">${func.id}</span></td>
+            <td>${func.cargo || '-'}</td>
             <td><span class="status-badge ${statusClass}">${func.status}</span></td>
             <td><strong>${func.totalSaldoStr}</strong></td>
             <td>${formatDate(func.dataVencimento)}</td>
@@ -189,7 +231,9 @@ function displayResults() {
                 </span>
             </td>
             <td>
-                <i class="fas fa-circle" style="color: ${getAlertColor(func.alerta)}"></i>
+                <div class="priority-indicator ${priorityClass}">
+                    <span class="priority-dot"></span>
+                </div>
             </td>
             <td>
                 <button class="action-btn" onclick="showDetails('${func.id}')" title="Ver detalhes">
@@ -200,31 +244,59 @@ function displayResults() {
                 </button>
             </td>
         `;
-        
+
         tableBody.appendChild(row);
     });
-    
+
     // Mostrar seção de resultados
     resultsSection.style.display = 'block';
-    
+
     // Atualizar informações de processamento
-    totalRegistros.textContent = `${groupedData.length} funcionários`;
-    dataProcessamento.textContent = `Processado em: ${new Date().toLocaleString()}`;
+    totalRegistros.textContent = groupedData.length;
+    dataProcessamento.textContent = `Processado em: ${new Date().toLocaleString('pt-BR')}`;
+    updateShowingCount();
+}
+
+// Atualizar contador de registros exibidos
+function updateShowingCount() {
+    const visibleRows = tableBody.querySelectorAll('tr:not([style*="display: none"])').length;
+    if (showingCount) {
+        showingCount.textContent = visibleRows;
+    }
 }
 
 // Atualizar resumo de alertas
 function updateSummary() {
     let critical = 0, warning = 0, normal = 0;
-    
+
     groupedData.forEach(func => {
         if (func.alerta === 'critical') critical++;
         else if (func.alerta === 'warning') warning++;
         else normal++;
     });
-    
-    countCritical.textContent = critical;
-    countWarning.textContent = warning;
-    countNormal.textContent = normal;
+
+    // Animar contadores
+    animateCounter(countCritical, critical);
+    animateCounter(countWarning, warning);
+    animateCounter(countNormal, normal);
+}
+
+// Animação de contador
+function animateCounter(element, targetValue) {
+    const duration = 500;
+    const start = parseInt(element.textContent) || 0;
+    const increment = (targetValue - start) / (duration / 16);
+    let current = start;
+
+    const timer = setInterval(() => {
+        current += increment;
+        if ((increment > 0 && current >= targetValue) || (increment < 0 && current <= targetValue)) {
+            element.textContent = targetValue;
+            clearInterval(timer);
+        } else {
+            element.textContent = Math.round(current);
+        }
+    }, 16);
 }
 
 // Filtrar tabela
@@ -236,10 +308,10 @@ function filterTable() {
     const rows = tableBody.querySelectorAll('tr');
 
     rows.forEach(row => {
-        const status = row.querySelector('.status-badge').textContent;
+        const status = row.querySelector('.status-badge')?.textContent || '';
         const name = row.cells[0].textContent.toLowerCase();
         // Índice correto: 6 = coluna "Dias a Vencer"
-        const alertBadge = row.cells[6].querySelector('.alert-badge');
+        const alertBadge = row.cells[6]?.querySelector('.alert-badge');
         const diasText = alertBadge ? alertBadge.textContent : '0';
         const dias = parseInt(diasText) || 0;
 
@@ -254,21 +326,23 @@ function filterTable() {
 
         row.style.display = (statusMatch && daysMatch && nameMatch) ? '' : 'none';
     });
+
+    updateShowingCount();
 }
 
 // Mostrar detalhes do funcionário
 function showDetails(funcId) {
     const func = groupedData.find(f => f.id === funcId);
     if (!func) return;
-    
-    modalTitle.textContent = `Detalhes: ${func.nome}`;
-    
+
+    modalTitle.innerHTML = `<i class="fas fa-user-circle"></i> ${func.nome}`;
+
     // Ordenar lançamentos por data de vencimento
     const lancamentosOrdenados = [...func.lancamentos].sort((a, b) => {
-        return new Date(a.dataVenc) - new Date(b.dataVenc);
+        return a.diasVencer - b.diasVencer;
     });
-    
-    let lancamentosHTML = '<table style="width:100%; margin-top:20px;">';
+
+    let lancamentosHTML = '<div class="table-container"><table style="width:100%;">';
     lancamentosHTML += `
         <thead>
             <tr>
@@ -276,40 +350,41 @@ function showDetails(funcId) {
                 <th>Data Movimento</th>
                 <th>Data Vencimento</th>
                 <th>Saldo</th>
-                <th>Dias a Vencer</th>
+                <th>Dias</th>
             </tr>
         </thead>
         <tbody>
     `;
-    
+
     lancamentosOrdenados.forEach(lanc => {
+        const alertClass = lanc.diasVencer < 7 ? 'alert-critical' :
+                          lanc.diasVencer <= 30 ? 'alert-warning' : 'alert-normal';
         lancamentosHTML += `
             <tr>
-                <td>${lanc.descricao}</td>
+                <td>${lanc.descricao || '-'}</td>
                 <td>${formatDate(lanc.dataMovto)}</td>
                 <td>${formatDate(lanc.dataVenc)}</td>
-                <td>${lanc.saldo}</td>
-                <td>${lanc.diasVencer}</td>
+                <td><strong>${lanc.saldo}</strong></td>
+                <td><span class="alert-badge ${alertClass}">${lanc.diasVencer}</span></td>
             </tr>
         `;
     });
-    
-    lancamentosHTML += '</tbody></table>';
-    
+
+    lancamentosHTML += '</tbody></table></div>';
+
     modalContent.innerHTML = `
         <div class="func-info">
             <p><strong>ID:</strong> ${func.id}</p>
-            <p><strong>Cargo:</strong> ${func.cargo}</p>
+            <p><strong>Cargo:</strong> ${func.cargo || '-'}</p>
             <p><strong>Status:</strong> <span class="status-badge ${func.status === 'ATIVO' ? 'status-ativo' : 'status-ferias'}">${func.status}</span></p>
-            <p><strong>Empresa:</strong> ${func.empresa}</p>
-            <p><strong>Saldo Total:</strong> <strong style="font-size:1.2em;">${func.totalSaldoStr}</strong></p>
-            <p><strong>Próximo Vencimento:</strong> ${formatDate(func.dataVencimento)} (${func.minDiasVencer} dias)</p>
-            <p><strong>Nível de Alerta:</strong> <span class="alert-badge alert-${func.alerta}">${getAlertLabel(func.alerta)}</span></p>
+            <p><strong>Empresa:</strong> ${func.empresa || '-'}</p>
+            <p><strong>Saldo Total:</strong> <strong style="font-size:1.25em; color: var(--primary-600);">${func.totalSaldoStr}</strong></p>
+            <p><strong>Próximo Venc.:</strong> ${formatDate(func.dataVencimento)} <span class="alert-badge alert-${func.alerta}">${func.minDiasVencer} dias</span></p>
         </div>
-        <h4 style="margin-top:30px;">Lançamentos Individualizados:</h4>
+        <h4 style="margin: 24px 0 16px; font-size: 0.9375rem; color: var(--gray-700);"><i class="fas fa-list"></i> Lançamentos</h4>
         ${lancamentosHTML}
     `;
-    
+
     modal.style.display = 'block';
 }
 
@@ -359,12 +434,18 @@ function clearData() {
     groupedData = [];
     fileInput.value = '';
     resultsSection.style.display = 'none';
+    uploadSection.style.display = 'block';
     tableBody.innerHTML = '';
     filterStatus.value = 'all';
     filterDays.value = 'all';
     searchName.value = '';
 
-    showToast('Dados limpos. Você pode carregar um novo arquivo.', 'info');
+    // Reset counters
+    countCritical.textContent = '0';
+    countWarning.textContent = '0';
+    countNormal.textContent = '0';
+
+    showToast('Pronto para novo upload.', 'info');
 
     // Scroll suave até o topo
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -373,13 +454,13 @@ function clearData() {
 // Funções auxiliares
 function timeToMinutes(timeStr) {
     if (!timeStr) return 0;
-    
+
     // Lidar com formato "00:00" ou "0,125" (decimal)
     if (timeStr.includes(',')) {
         const horas = parseFloat(timeStr.replace(',', '.'));
         return Math.round(horas * 60);
     }
-    
+
     const [hours, minutes] = timeStr.split(':').map(Number);
     return hours * 60 + (minutes || 0);
 }
@@ -392,15 +473,19 @@ function minutesToTime(minutes) {
 
 function formatDate(dateStr) {
     if (!dateStr) return '-';
+    // Manter formato original se já estiver correto
+    if (dateStr.includes('/')) {
+        return dateStr;
+    }
     const [day, month, year] = dateStr.split('/');
     return `${day}/${month}/${year}`;
 }
 
 function getAlertColor(alerta) {
     switch(alerta) {
-        case 'critical': return '#ef4444';
-        case 'warning': return '#f59e0b';
-        default: return '#10b981';
+        case 'critical': return 'var(--danger-500)';
+        case 'warning': return 'var(--warning-500)';
+        default: return 'var(--success-500)';
     }
 }
 
@@ -428,7 +513,7 @@ function downloadEmployeeData(funcId) {
     const url = URL.createObjectURL(blob);
 
     link.setAttribute('href', url);
-    link.setAttribute('download', `detalhes_${func.nome.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `${func.nome.replace(/\s+/g, '_')}_horas.csv`);
     link.style.visibility = 'hidden';
 
     document.body.appendChild(link);
@@ -451,7 +536,7 @@ function showToast(message, type = 'success') {
 
     let icon = 'check-circle';
     if (type === 'error') icon = 'times-circle';
-    if (type === 'warning') icon = 'exclamation-circle';
+    if (type === 'warning') icon = 'exclamation-triangle';
     if (type === 'info') icon = 'info-circle';
 
     toast.innerHTML = `
@@ -465,13 +550,15 @@ function showToast(message, type = 'success') {
     document.body.appendChild(toast);
 
     // Trigger animation
-    setTimeout(() => toast.classList.add('show'), 10);
+    requestAnimationFrame(() => {
+        toast.classList.add('show');
+    });
 
-    // Auto remove after 5 seconds
+    // Auto remove after 4 seconds
     setTimeout(() => {
         toast.classList.remove('show');
         setTimeout(() => toast.remove(), 300);
-    }, 5000);
+    }, 4000);
 }
 
 // Função para mostrar/esconder loading
@@ -495,3 +582,9 @@ function showLoading(show = true) {
         loadingOverlay.style.display = show ? 'flex' : 'none';
     }
 }
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', () => {
+    // Verificar se há dados salvos (opcional para persistência)
+    console.log('HorasControl initialized');
+});

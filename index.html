@@ -3,144 +3,345 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal de Controle de Horas a Vencer</title>
+    <title>HorasControl - Gestão de Horas a Vencer</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1><i class="fas fa-clock"></i> Portal de Controle de Horas a Vencer</h1>
-            <p class="subtitle">Faça upload da planilha CSV para processar e visualizar o status das horas</p>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <span class="logo-text">HorasControl</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-users"></i>
+                <span>Funcionários</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Relatórios</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Configurações</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="help-card">
+                <div class="help-icon">
+                    <i class="fas fa-question-circle"></i>
+                </div>
+                <p>Precisa de ajuda?</p>
+                <a href="#" class="help-link">Ver documentação</a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Bar -->
+        <header class="top-bar">
+            <div class="top-bar-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item">Dashboard</span>
+                    <i class="fas fa-chevron-right"></i>
+                    <span class="breadcrumb-item active">Upload de Planilha</span>
+                </div>
+            </div>
+            <div class="top-bar-right">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Buscar...">
+                </div>
+                <button class="icon-btn notification-btn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+                <div class="user-menu">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <span class="user-name">Admin</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
         </header>
 
-        <main>
-            <div class="upload-section">
-                <div class="upload-area" id="dropArea">
-                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
-                    <h3>Arraste e solte seu arquivo CSV aqui</h3>
-                    <p>ou</p>
-                    <label for="fileInput" class="btn btn-primary">
-                        <i class="fas fa-file-upload"></i> Selecione o Arquivo
-                    </label>
-                    <input type="file" id="fileInput" accept=".csv" hidden>
-                    <p class="file-info">Formato esperado: CSV com separador ponto-e-vírgula (;)</p>
+        <!-- Page Content -->
+        <div class="page-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h1>Controle de Horas a Vencer</h1>
+                    <p>Importe sua planilha CSV e visualize o status das horas de seus funcionários</p>
                 </div>
-                
-                <div class="requirements">
-                    <h4><i class="fas fa-info-circle"></i> Estrutura do Arquivo:</h4>
-                    <ul>
-                        <li>Formato CSV com cabeçalho</li>
-                        <li>Separador: ponto-e-vírgula (;)</li>
-                        <li>Colunas esperadas: FUNC_ID, NOME, EMPRESA_COD, CARGO, STATUS, DESCRICAO, BHMV_DAT_MOVTO, DATA_VENC, SALDO, A_VENCER_EM_DIAS</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="results-section" id="resultsSection" style="display: none;">
-                <div class="results-header">
-                    <h2><i class="fas fa-chart-bar"></i> Resultados Processados</h2>
-                    <div class="stats">
-                        <span id="totalRegistros">0 registros</span>
-                        <span id="dataProcessamento">-</span>
-                    </div>
-                </div>
-
-                <div class="alert-summary">
-                    <div class="alert-card urgent">
-                        <h4><i class="fas fa-exclamation-triangle"></i> Crítico (< 7 dias)</h4>
-                        <p id="countCritical">0</p>
-                    </div>
-                    <div class="alert-card warning">
-                        <h4><i class="fas fa-exclamation-circle"></i> Alerta (7-30 dias)</h4>
-                        <p id="countWarning">0</p>
-                    </div>
-                    <div class="alert-card normal">
-                        <h4><i class="fas fa-check-circle"></i> Normal (> 30 dias)</h4>
-                        <p id="countNormal">0</p>
-                    </div>
-                </div>
-
-                <div class="filters">
-                    <div class="filter-group">
-                        <label for="filterStatus"><i class="fas fa-user-tag"></i> Status:</label>
-                        <select id="filterStatus">
-                            <option value="all">Todos</option>
-                            <option value="ATIVO">Ativos</option>
-                            <option value="FÉRIAS">Férias</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label for="filterDays"><i class="fas fa-calendar-day"></i> Dias a Vencer:</label>
-                        <select id="filterDays">
-                            <option value="all">Todos</option>
-                            <option value="critical">Crítico (< 7 dias)</option>
-                            <option value="warning">Alerta (7-30 dias)</option>
-                            <option value="normal">Normal (> 30 dias)</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label for="searchName"><i class="fas fa-search"></i> Buscar Nome:</label>
-                        <input type="text" id="searchName" placeholder="Digite o nome...">
-                    </div>
-                </div>
-
-                <div class="table-container">
-                    <table id="dataTable">
-                        <thead>
-                            <tr>
-                                <th>Funcionário</th>
-                                <th>ID</th>
-                                <th>Cargo</th>
-                                <th>Status</th>
-                                <th>Saldo (HH:MM)</th>
-                                <th>Data Vencimento</th>
-                                <th>Dias a Vencer</th>
-                                <th>Alerta</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody">
-                            <!-- Dados serão inseridos aqui -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="export-section">
-                    <button id="exportBtn" class="btn btn-success">
-                        <i class="fas fa-file-export"></i> Exportar Resumo
-                    </button>
-                    <button id="clearBtn" class="btn btn-secondary">
-                        <i class="fas fa-redo"></i> Processar Novo Arquivo
+                <div class="page-header-actions">
+                    <button class="btn btn-outline" id="helpBtn">
+                        <i class="fas fa-question-circle"></i>
+                        Como usar
                     </button>
                 </div>
             </div>
 
-            <div class="instructions">
-                <h3><i class="fas fa-question-circle"></i> Como Usar:</h3>
-                <ol>
-                    <li>Exporte a planilha do sistema no formato CSV (separador ;)</li>
-                    <li>Faça o upload usando o botão acima</li>
-                    <li>Visualize os resultados com alertas de vencimento</li>
-                    <li>Filtre por status, dias a vencer ou nome</li>
-                    <li>Exporte o resumo se necessário</li>
-                </ol>
-            </div>
-        </main>
+            <!-- Upload Section -->
+            <section class="upload-section" id="uploadSection">
+                <div class="upload-card">
+                    <div class="upload-area" id="dropArea">
+                        <div class="upload-content">
+                            <div class="upload-icon-wrapper">
+                                <div class="upload-icon-bg"></div>
+                                <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            </div>
+                            <h3>Arraste seu arquivo aqui</h3>
+                            <p class="upload-subtitle">ou clique para selecionar</p>
+                            <label for="fileInput" class="btn btn-primary btn-upload">
+                                <i class="fas fa-folder-open"></i>
+                                Selecionar Arquivo CSV
+                            </label>
+                            <input type="file" id="fileInput" accept=".csv" hidden>
+                            <div class="upload-info">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Formato: CSV com separador ponto-e-vírgula (;)</span>
+                            </div>
+                        </div>
+                    </div>
 
-        <footer>
-            <p><i class="fas fa-code"></i> Desenvolvido para controle de horas a vencer | 
-               <i class="fas fa-github"></i> <a href="https://github.com/seu-usuario/horas-a-vencer-portal" target="_blank">GitHub Repository</a></p>
-        </footer>
-    </div>
+                    <div class="upload-requirements">
+                        <h4><i class="fas fa-list-check"></i> Estrutura esperada do arquivo</h4>
+                        <div class="requirements-grid">
+                            <div class="requirement-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Formato CSV com cabeçalho</span>
+                            </div>
+                            <div class="requirement-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Separador: ponto-e-vírgula (;)</span>
+                            </div>
+                            <div class="requirement-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Codificação UTF-8</span>
+                            </div>
+                        </div>
+                        <div class="columns-list">
+                            <span class="column-tag">FUNC_ID</span>
+                            <span class="column-tag">NOME</span>
+                            <span class="column-tag">EMPRESA_COD</span>
+                            <span class="column-tag">CARGO</span>
+                            <span class="column-tag">STATUS</span>
+                            <span class="column-tag">DESCRICAO</span>
+                            <span class="column-tag">BHMV_DAT_MOVTO</span>
+                            <span class="column-tag">DATA_VENC</span>
+                            <span class="column-tag">SALDO</span>
+                            <span class="column-tag">A_VENCER_EM_DIAS</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card stat-total">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <span class="stat-value" id="totalRegistros">0</span>
+                            <span class="stat-label">Total de Funcionários</span>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-critical">
+                        <div class="stat-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <span class="stat-value" id="countCritical">0</span>
+                            <span class="stat-label">Crítico (&lt; 7 dias)</span>
+                        </div>
+                        <div class="stat-trend trend-up">
+                            <i class="fas fa-arrow-up"></i>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-warning">
+                        <div class="stat-icon">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <span class="stat-value" id="countWarning">0</span>
+                            <span class="stat-label">Alerta (7-30 dias)</span>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-normal">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <span class="stat-value" id="countNormal">0</span>
+                            <span class="stat-label">Normal (&gt; 30 dias)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Table Card -->
+                <div class="table-card">
+                    <div class="table-header">
+                        <div class="table-title">
+                            <h2><i class="fas fa-table"></i> Lista de Funcionários</h2>
+                            <span class="table-subtitle" id="dataProcessamento">-</span>
+                        </div>
+                        <div class="table-actions">
+                            <button id="exportBtn" class="btn btn-success btn-sm">
+                                <i class="fas fa-download"></i>
+                                Exportar CSV
+                            </button>
+                            <button id="clearBtn" class="btn btn-ghost btn-sm">
+                                <i class="fas fa-refresh"></i>
+                                Novo Upload
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="filters-bar">
+                        <div class="filter-group">
+                            <label><i class="fas fa-filter"></i> Filtros:</label>
+                        </div>
+                        <div class="filter-group">
+                            <select id="filterStatus" class="filter-select">
+                                <option value="all">Todos os Status</option>
+                                <option value="ATIVO">Ativos</option>
+                                <option value="FÉRIAS">Férias</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <select id="filterDays" class="filter-select">
+                                <option value="all">Todos os Prazos</option>
+                                <option value="critical">Crítico (&lt; 7 dias)</option>
+                                <option value="warning">Alerta (7-30 dias)</option>
+                                <option value="normal">Normal (&gt; 30 dias)</option>
+                            </select>
+                        </div>
+                        <div class="filter-group search-group">
+                            <div class="search-input-wrapper">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="searchName" placeholder="Buscar por nome..." class="filter-input">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="table-container">
+                        <table id="dataTable">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <span class="th-content">
+                                            <i class="fas fa-user"></i> Funcionário
+                                        </span>
+                                    </th>
+                                    <th>ID</th>
+                                    <th>Cargo</th>
+                                    <th>Status</th>
+                                    <th>Saldo</th>
+                                    <th>Vencimento</th>
+                                    <th>Dias</th>
+                                    <th>Prioridade</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                                <!-- Dados serão inseridos aqui -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Table Footer -->
+                    <div class="table-footer">
+                        <div class="table-info">
+                            Mostrando <span id="showingCount">0</span> registros
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
 
     <!-- Modal para detalhes -->
     <div id="detailsModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h3 id="modalTitle">Detalhes do Funcionário</h3>
-            <div id="modalContent">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 id="modalTitle">Detalhes do Funcionário</h3>
+                <button class="modal-close close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modalContent">
                 <!-- Conteúdo dinâmico -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="helpModal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container modal-lg">
+            <div class="modal-header">
+                <h3><i class="fas fa-question-circle"></i> Como Usar o Sistema</h3>
+                <button class="modal-close" onclick="document.getElementById('helpModal').style.display='none'">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="help-steps">
+                    <div class="help-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Exporte a planilha</h4>
+                            <p>Exporte a planilha do sistema no formato CSV com separador ponto-e-vírgula (;)</p>
+                        </div>
+                    </div>
+                    <div class="help-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>Faça o Upload</h4>
+                            <p>Arraste o arquivo para a área de upload ou clique para selecionar</p>
+                        </div>
+                    </div>
+                    <div class="help-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>Visualize os Resultados</h4>
+                            <p>Veja os alertas de vencimento com cores indicativas de prioridade</p>
+                        </div>
+                    </div>
+                    <div class="help-step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h4>Filtre e Exporte</h4>
+                            <p>Use os filtros para encontrar funcionários específicos e exporte relatórios</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
