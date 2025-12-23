@@ -183,8 +183,8 @@ function groupData() {
 
         // Determinar nível de alerta
         let alerta = 'normal';
-        if (func.minDiasVencer < 7) alerta = 'critical';
-        else if (func.minDiasVencer <= 30) alerta = 'warning';
+        if (func.minDiasVencer < 30) alerta = 'critical';
+        else if (func.minDiasVencer <= 60) alerta = 'warning';
 
         return {
             ...func,
@@ -309,9 +309,9 @@ function filterTable() {
         let statusMatch = statusFilter === 'all' || status === statusFilter;
         let daysMatch = true;
 
-        if (daysFilter === 'critical') daysMatch = dias < 7;
-        else if (daysFilter === 'warning') daysMatch = dias >= 7 && dias <= 30;
-        else if (daysFilter === 'normal') daysMatch = dias > 30;
+        if (daysFilter === 'critical') daysMatch = dias < 30;
+        else if (daysFilter === 'warning') daysMatch = dias >= 30 && dias <= 60;
+        else if (daysFilter === 'normal') daysMatch = dias > 60;
 
         const nameMatch = name.includes(nameFilter);
 
@@ -348,8 +348,8 @@ function showDetails(funcId) {
     `;
 
     lancamentosOrdenados.forEach(lanc => {
-        const alertClass = lanc.diasVencer < 7 ? 'alert-critical' :
-                          lanc.diasVencer <= 30 ? 'alert-warning' : 'alert-normal';
+        const alertClass = lanc.diasVencer < 30 ? 'alert-critical' :
+                          lanc.diasVencer <= 60 ? 'alert-warning' : 'alert-normal';
         lancamentosHTML += `
             <tr>
                 <td>${lanc.descricao || '-'}</td>
@@ -483,7 +483,7 @@ function getAlertColor(alerta) {
 function getAlertLabel(alerta) {
     switch(alerta) {
         case 'critical': return 'Crítico';
-        case 'warning': return 'Alerta';
+        case 'warning': return 'Atenção';
         default: return 'Normal';
     }
 }
