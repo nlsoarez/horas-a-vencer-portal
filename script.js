@@ -24,8 +24,6 @@ const modalContent = document.getElementById('modalContent');
 const closeModal = document.querySelector('.close');
 const menuToggle = document.getElementById('menuToggle');
 const sidebar = document.querySelector('.sidebar');
-const helpBtn = document.getElementById('helpBtn');
-const helpModal = document.getElementById('helpModal');
 const showingCount = document.getElementById('showingCount');
 
 // Event Listeners
@@ -52,13 +50,6 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
 if (menuToggle) {
     menuToggle.addEventListener('click', () => {
         sidebar.classList.toggle('active');
-    });
-}
-
-// Help modal
-if (helpBtn) {
-    helpBtn.addEventListener('click', () => {
-        helpModal.style.display = 'block';
     });
 }
 

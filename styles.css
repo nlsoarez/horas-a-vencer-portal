@@ -227,6 +227,33 @@ body {
     color: var(--primary-300);
 }
 
+/* Credits Card */
+.credits-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.credits-text {
+    color: var(--gray-500);
+    font-size: 0.75rem;
+    margin-bottom: 4px;
+}
+
+.credits-author {
+    color: var(--primary-400);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.credits-copy {
+    color: var(--gray-600);
+    font-size: 0.6875rem;
+}
+
 /* ===================================
    MAIN CONTENT
    =================================== */
@@ -584,6 +611,40 @@ body {
 
 .btn-upload {
     margin-bottom: 20px;
+}
+
+/* Compact Upload Styles */
+.upload-card-compact {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.upload-area-compact {
+    padding: 40px 30px;
+    margin: 20px;
+}
+
+.upload-icon-small {
+    width: 70px;
+    height: 70px;
+    margin-bottom: 16px;
+}
+
+.upload-icon-small .upload-icon {
+    font-size: 1.75rem;
+}
+
+.upload-area-compact h3 {
+    font-size: 1.125rem;
+}
+
+.upload-area-compact .upload-subtitle {
+    margin-bottom: 16px;
+    font-size: 0.875rem;
+}
+
+.upload-area-compact .upload-info {
+    margin-top: 12px;
 }
 
 .upload-info {
@@ -1056,6 +1117,30 @@ td:first-child {
 .table-info {
     font-size: 0.8125rem;
     color: var(--gray-500);
+}
+
+/* Page Footer */
+.page-footer {
+    text-align: center;
+    padding: 30px 20px;
+    margin-top: 40px;
+    border-top: 1px solid var(--gray-200);
+    color: var(--gray-500);
+}
+
+.page-footer p {
+    font-size: 0.875rem;
+    margin-bottom: 4px;
+}
+
+.page-footer strong {
+    color: var(--primary-600);
+    font-weight: 600;
+}
+
+.page-footer .copyright {
+    font-size: 0.75rem;
+    color: var(--gray-400);
 }
 
 /* ===================================

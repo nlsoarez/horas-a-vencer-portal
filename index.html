@@ -27,27 +27,13 @@
                 <i class="fas fa-home"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="#" class="nav-item">
-                <i class="fas fa-users"></i>
-                <span>Funcionários</span>
-            </a>
-            <a href="#" class="nav-item">
-                <i class="fas fa-chart-line"></i>
-                <span>Relatórios</span>
-            </a>
-            <a href="#" class="nav-item">
-                <i class="fas fa-cog"></i>
-                <span>Configurações</span>
-            </a>
         </nav>
 
         <div class="sidebar-footer">
-            <div class="help-card">
-                <div class="help-icon">
-                    <i class="fas fa-question-circle"></i>
-                </div>
-                <p>Precisa de ajuda?</p>
-                <a href="#" class="help-link">Ver documentação</a>
+            <div class="credits-card">
+                <p class="credits-text">Desenvolvido por</p>
+                <p class="credits-author">Nelson Soares</p>
+                <p class="credits-copy">&copy; 2025 - Todos os direitos reservados</p>
             </div>
         </div>
     </aside>
@@ -66,23 +52,6 @@
                     <span class="breadcrumb-item active">Upload de Planilha</span>
                 </div>
             </div>
-            <div class="top-bar-right">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Buscar...">
-                </div>
-                <button class="icon-btn notification-btn">
-                    <i class="fas fa-bell"></i>
-                    <span class="notification-badge">3</span>
-                </button>
-                <div class="user-menu">
-                    <div class="user-avatar">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <span class="user-name">Admin</span>
-                    <i class="fas fa-chevron-down"></i>
-                </div>
-            </div>
         </header>
 
         <!-- Page Content -->
@@ -93,28 +62,22 @@
                     <h1>Controle de Horas a Vencer</h1>
                     <p>Importe sua planilha CSV e visualize o status das horas de seus funcionários</p>
                 </div>
-                <div class="page-header-actions">
-                    <button class="btn btn-outline" id="helpBtn">
-                        <i class="fas fa-question-circle"></i>
-                        Como usar
-                    </button>
-                </div>
             </div>
 
             <!-- Upload Section -->
             <section class="upload-section" id="uploadSection">
-                <div class="upload-card">
-                    <div class="upload-area" id="dropArea">
+                <div class="upload-card upload-card-compact">
+                    <div class="upload-area upload-area-compact" id="dropArea">
                         <div class="upload-content">
-                            <div class="upload-icon-wrapper">
+                            <div class="upload-icon-wrapper upload-icon-small">
                                 <div class="upload-icon-bg"></div>
                                 <i class="fas fa-cloud-upload-alt upload-icon"></i>
                             </div>
                             <h3>Arraste seu arquivo aqui</h3>
                             <p class="upload-subtitle">ou clique para selecionar</p>
-                            <label for="fileInput" class="btn btn-primary btn-upload">
+                            <label for="fileInput" class="btn btn-primary btn-sm">
                                 <i class="fas fa-folder-open"></i>
-                                Selecionar Arquivo CSV
+                                Selecionar CSV
                             </label>
                             <input type="file" id="fileInput" accept=".csv" hidden>
                             <div class="upload-info">
@@ -282,6 +245,12 @@
                     </div>
                 </div>
             </section>
+
+            <!-- Footer -->
+            <footer class="page-footer">
+                <p>Desenvolvido por <strong>Nelson Soares</strong></p>
+                <p class="copyright">&copy; 2025 HorasControl - Todos os direitos reservados</p>
+            </footer>
         </div>
     </main>
 
@@ -297,51 +266,6 @@
             </div>
             <div class="modal-body" id="modalContent">
                 <!-- Conteúdo dinâmico -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Help Modal -->
-    <div id="helpModal" class="modal">
-        <div class="modal-overlay"></div>
-        <div class="modal-container modal-lg">
-            <div class="modal-header">
-                <h3><i class="fas fa-question-circle"></i> Como Usar o Sistema</h3>
-                <button class="modal-close" onclick="document.getElementById('helpModal').style.display='none'">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="help-steps">
-                    <div class="help-step">
-                        <div class="step-number">1</div>
-                        <div class="step-content">
-                            <h4>Exporte a planilha</h4>
-                            <p>Exporte a planilha do sistema no formato CSV com separador ponto-e-vírgula (;)</p>
-                        </div>
-                    </div>
-                    <div class="help-step">
-                        <div class="step-number">2</div>
-                        <div class="step-content">
-                            <h4>Faça o Upload</h4>
-                            <p>Arraste o arquivo para a área de upload ou clique para selecionar</p>
-                        </div>
-                    </div>
-                    <div class="help-step">
-                        <div class="step-number">3</div>
-                        <div class="step-content">
-                            <h4>Visualize os Resultados</h4>
-                            <p>Veja os alertas de vencimento com cores indicativas de prioridade</p>
-                        </div>
-                    </div>
-                    <div class="help-step">
-                        <div class="step-number">4</div>
-                        <div class="step-content">
-                            <h4>Filtre e Exporte</h4>
-                            <p>Use os filtros para encontrar funcionários específicos e exporte relatórios</p>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
