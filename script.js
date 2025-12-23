@@ -25,6 +25,7 @@ const closeModal = document.querySelector('.close');
 // Event Listeners
 fileInput.addEventListener('change', handleFileSelect);
 dropArea.addEventListener('dragover', handleDragOver);
+dropArea.addEventListener('dragleave', handleDragLeave);
 dropArea.addEventListener('drop', handleDrop);
 filterStatus.addEventListener('change', filterTable);
 filterDays.addEventListener('change', filterTable);
@@ -48,6 +49,11 @@ function handleDragOver(event) {
     dropArea.classList.add('dragover');
 }
 
+function handleDragLeave(event) {
+    event.preventDefault();
+    dropArea.classList.remove('dragover');
+}
+
 function handleDrop(event) {
     event.preventDefault();
     dropArea.classList.remove('dragover');
@@ -55,24 +61,47 @@ function handleDrop(event) {
     if (file && file.name.endsWith('.csv')) {
         processFile(file);
     } else {
-        alert('Por favor, selecione um arquivo CSV válido.');
+        showToast('Por favor, selecione um arquivo CSV válido.', 'error');
     }
 }
 
 // Processar arquivo CSV
 function processFile(file) {
+    if (!file) {
+        showToast('Nenhum arquivo selecionado.', 'error');
+        return;
+    }
+
+    showLoading(true);
+
     Papa.parse(file, {
         delimiter: ';',
         header: true,
         skipEmptyLines: true,
         complete: function(results) {
+            showLoading(false);
+
+            if (results.data.length === 0) {
+                showToast('O arquivo está vazio ou não possui dados válidos.', 'error');
+                return;
+            }
+
             processedData = results.data;
             groupData();
             displayResults();
             updateSummary();
+
+            // Mostrar popup de sucesso
+            const totalFunc = groupedData.length;
+            const totalLanc = processedData.length;
+            showToast(`Planilha carregada com sucesso! ${totalFunc} funcionário(s) e ${totalLanc} lançamento(s) processados.`, 'success');
+
+            // Scroll suave até os resultados
+            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         },
         error: function(error) {
-            alert('Erro ao processar o arquivo: ' + error.message);
+            showLoading(false);
+            showToast('Erro ao processar o arquivo: ' + error.message, 'error');
         }
     });
 }
@@ -203,25 +232,26 @@ function filterTable() {
     const statusFilter = filterStatus.value;
     const daysFilter = filterDays.value;
     const nameFilter = searchName.value.toLowerCase();
-    
+
     const rows = tableBody.querySelectorAll('tr');
-    
+
     rows.forEach(row => {
         const status = row.querySelector('.status-badge').textContent;
-        const alertClass = row.querySelector('.alert-badge').className;
         const name = row.cells[0].textContent.toLowerCase();
-        const diasText = row.cells[5].querySelector('.alert-badge').textContent;
+        // Índice correto: 6 = coluna "Dias a Vencer"
+        const alertBadge = row.cells[6].querySelector('.alert-badge');
+        const diasText = alertBadge ? alertBadge.textContent : '0';
         const dias = parseInt(diasText) || 0;
-        
+
         let statusMatch = statusFilter === 'all' || status === statusFilter;
         let daysMatch = true;
-        
+
         if (daysFilter === 'critical') daysMatch = dias < 7;
         else if (daysFilter === 'warning') daysMatch = dias >= 7 && dias <= 30;
         else if (daysFilter === 'normal') daysMatch = dias > 30;
-        
+
         const nameMatch = name.includes(nameFilter);
-        
+
         row.style.display = (statusMatch && daysMatch && nameMatch) ? '' : 'none';
     });
 }
@@ -286,13 +316,13 @@ function showDetails(funcId) {
 // Exportar resumo
 function exportSummary() {
     if (groupedData.length === 0) {
-        alert('Não há dados para exportar.');
+        showToast('Não há dados para exportar.', 'warning');
         return;
     }
-    
+
     // Criar CSV
     let csvContent = "ID;Nome;Cargo;Status;Saldo Total;Data Vencimento;Dias a Vencer;Alerta\n";
-    
+
     groupedData.forEach(func => {
         const linha = [
             func.id,
@@ -306,19 +336,21 @@ function exportSummary() {
         ].join(';');
         csvContent += linha + "\n";
     });
-    
+
     // Criar blob e download
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
-    
+
     link.setAttribute('href', url);
     link.setAttribute('download', `resumo_horas_${new Date().toISOString().split('T')[0]}.csv`);
     link.style.visibility = 'hidden';
-    
+
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+
+    showToast('Resumo exportado com sucesso!', 'success');
 }
 
 // Limpar dados
@@ -331,6 +363,11 @@ function clearData() {
     filterStatus.value = 'all';
     filterDays.value = 'all';
     searchName.value = '';
+
+    showToast('Dados limpos. Você pode carregar um novo arquivo.', 'info');
+
+    // Scroll suave até o topo
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // Funções auxiliares
@@ -378,23 +415,83 @@ function getAlertLabel(alerta) {
 function downloadEmployeeData(funcId) {
     const func = groupedData.find(f => f.id === funcId);
     if (!func) return;
-    
+
     let csvContent = `Funcionário: ${func.nome}\nID: ${func.id}\nCargo: ${func.cargo}\nStatus: ${func.status}\nSaldo Total: ${func.totalSaldoStr}\n\n`;
     csvContent += "Descrição;Data Movimento;Data Vencimento;Saldo;Dias a Vencer\n";
-    
+
     func.lancamentos.forEach(lanc => {
         csvContent += `${lanc.descricao};${lanc.dataMovto};${lanc.dataVenc};${lanc.saldo};${lanc.diasVencer}\n`;
     });
-    
+
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
-    
+
     link.setAttribute('href', url);
     link.setAttribute('download', `detalhes_${func.nome.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`);
     link.style.visibility = 'hidden';
-    
+
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+
+    showToast('Dados exportados com sucesso!', 'success');
+}
+
+// Função para mostrar toast/notificação
+function showToast(message, type = 'success') {
+    // Remove toast existente se houver
+    const existingToast = document.querySelector('.toast');
+    if (existingToast) {
+        existingToast.remove();
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+
+    let icon = 'check-circle';
+    if (type === 'error') icon = 'times-circle';
+    if (type === 'warning') icon = 'exclamation-circle';
+    if (type === 'info') icon = 'info-circle';
+
+    toast.innerHTML = `
+        <i class="fas fa-${icon}"></i>
+        <span>${message}</span>
+        <button class="toast-close" onclick="this.parentElement.remove()">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+
+    document.body.appendChild(toast);
+
+    // Trigger animation
+    setTimeout(() => toast.classList.add('show'), 10);
+
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 5000);
+}
+
+// Função para mostrar/esconder loading
+function showLoading(show = true) {
+    let loadingOverlay = document.getElementById('loadingOverlay');
+
+    if (!loadingOverlay && show) {
+        loadingOverlay = document.createElement('div');
+        loadingOverlay.id = 'loadingOverlay';
+        loadingOverlay.className = 'loading-overlay';
+        loadingOverlay.innerHTML = `
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Processando arquivo...</p>
+            </div>
+        `;
+        document.body.appendChild(loadingOverlay);
+    }
+
+    if (loadingOverlay) {
+        loadingOverlay.style.display = show ? 'flex' : 'none';
+    }
 }
